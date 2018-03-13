@@ -29,8 +29,9 @@ func ServerOption() *peer.Option {
 	option.ReconnectTimes = getInt("net.reconnectTimes", option.ReconnectTimes)
 	option.KeepAliveInterval = getDuration("net.keepAliveInterval", option.KeepAliveInterval)
 	option.KeepAliveTimes = getInt("net.keepAliveTimes", option.KeepAliveTimes)
-	option.BootstrapNodes = getStringSlice("net.bootstrapNodes", option.BootstrapNodes)
 	option.MaxPeers = getInt("net.maxPeers", option.MaxPeers)
 	option.MinPeers = getInt("net.minPeers", option.MinPeers)
+	option.PeerID = []byte(getString("blockchain.nodeId", string(option.PeerID)))
+	option.BootstrapNodes = getStringSlice("net.bootstrapNodes", option.BootstrapNodes)
 	return option
 }
