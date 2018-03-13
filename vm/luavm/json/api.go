@@ -1,4 +1,3 @@
-package utils
 // Copyright (C) 2017, Zipper Team.  All rights reserved.
 //
 // This file is part of zipper
@@ -15,6 +14,8 @@ package utils
 //
 // You should have received a copy of the ISC License
 // along with this program.  If not, see <https://opensource.org/licenses/isc>.
+
+package utils
 
 import (
 	"encoding/json"
