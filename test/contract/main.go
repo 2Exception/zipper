@@ -114,7 +114,7 @@ var (
 	//[]string{"testwrite", "8ce1bb0858e71b50d603ebe4bec95b11d8833e68", "100"})
 
 	coinJS = newContractConf(
-		"./l0coin.js",
+		"./template.js",
 		langJS,
 		false,
 		[]string{"hello", "world"},
@@ -140,9 +140,9 @@ func main() {
 	time.Sleep(1 * time.Microsecond)
 
 	//issueTX()
-	transferTx()
+	//transferTx()
 	//testSecurityContract()
-	//deploySmartContractTX(coinJS)
+	deploySmartContractTX(coinJS)
 	// time.Sleep(10 * time.Second)
 	// execSmartContractTX(coinJS)
 
@@ -244,7 +244,7 @@ func transferTx() {
 func deploySmartContractTX(conf *contractConf) []byte {
 	contractSpec := new(proto.ContractSpec)
 	contractSpec.Params = conf.initArgs
-
+	nonce := rand.Uint32()
 	f, _ := os.Open(conf.path)
 	buf, _ := ioutil.ReadAll(f)
 	contractSpec.Code = buf
@@ -256,12 +256,11 @@ func deploySmartContractTX(conf *contractConf) []byte {
 		contractSpec.Addr = a.Bytes()
 	}
 
-	nonce := 1
 	tx := proto.NewTransaction(
 		account.NewChainCoordinate(fromChain),
 		account.NewChainCoordinate(toChain),
 		conf.lang.ConvertInitTxType(),
-		uint32(nonce),
+		nonce,
 		sender,
 		account.NewAddress(contractSpec.Addr),
 		1,

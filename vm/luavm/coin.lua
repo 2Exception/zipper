@@ -1,7 +1,7 @@
 -- require module
 local ZIP = require("ZIP")
 
--- 合约创建时会被调用一次，之后就不会被调用
+-- init
 function Init(args)
     print("init...", args)
     return true

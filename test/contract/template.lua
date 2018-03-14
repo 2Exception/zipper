@@ -1,20 +1,19 @@
--- 用合约来完成 ***
-local L0 = require("L0")
+-- require module
+local ZIP = require("ZIP")
 
--- 合约创建时会被调用一次, 完成数据初始化
-function L0Init(args)
-
+-- init
+function Init(args)
+    print("init...", args)
     return true
 end
 
--- 每次合约执行都调用
-function L0Invoke(func, args)
-
-    return true,"ok"
+-- invoke when exec transaction
+function Invoke(func, args)
+    print("in Invoke", func, args)
+    return true
 end
 
--- 每次合约查询都调用
-function L0Query(args)
-
-    return true,"query detail"
+-- query
+function Query(args)
+    return "query ok"
 end
