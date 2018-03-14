@@ -135,6 +135,8 @@ func (srv *Server) listen(ctx context.Context, addr string) (err error) {
 		return
 	}
 
+	log.Debugf("listen connection ...")
+
 	defer listener.Close()
 	listener.SetDeadline(time.Now().Add(srv.option.DeadLine))
 	for {
@@ -156,6 +158,8 @@ func (srv *Server) listen(ctx context.Context, addr string) (err error) {
 		log.Debugf("Accept connection %s, %v", conn.RemoteAddr(), conn)
 		if peer, err := srv.peerManager.Add(conn, srv.protocol); err == nil {
 			peer.SendMsg(NewHandshakeMessage())
+		} else {
+			conn.Close()
 		}
 	}
 }
@@ -170,7 +174,7 @@ func (srv *Server) Stop() {
 	srv.cancel()
 	srv.waitGroup.Wait()
 	srv.cancel = nil
-	srv.peerManager.Stop()
+	//srv.peerManager.Stop()
 	log.Infoln("Server Stopped")
 }
 

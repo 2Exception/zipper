@@ -18,7 +18,6 @@
 
 package peer
 
-
 import (
 	"bytes"
 	"fmt"
@@ -84,9 +83,6 @@ func (pm *PeerManager) Add(conn net.Conn, protocol IProtocolManager) (*Peer, err
 func (pm *PeerManager) Remove(conn net.Conn) {
 	pm.Lock()
 	defer pm.Unlock()
-	if peer, ok := pm.peers[conn]; ok {
-		peer.Stop()
-	}
 	delete(pm.peers, conn)
 }
 
@@ -109,12 +105,12 @@ func (pm *PeerManager) Connect(peer *Peer, protocol IProtocolManager) {
 	pm.RLock()
 	defer pm.RUnlock()
 
-	if len(pm.peers) >= option.MaxPeers {
-		log.Warnf("connected peer more than max peers.")
+	if bytes.Equal(option.PeerID, peer.ID) {
 		return
 	}
-	if bytes.Equal(option.PeerID, peer.ID) {
-		log.Warnf("can ont connect self[%s]", peer.ID)
+
+	if len(pm.peers) >= option.MaxPeers {
+		log.Warnf("connected peer more than max peers.")
 		return
 	}
 	if pm.Contains(peer.ID) {
@@ -128,13 +124,16 @@ func (pm *PeerManager) Connect(peer *Peer, protocol IProtocolManager) {
 
 	go func() {
 		i := 0
-		log.Debugf("peer manager try connect : %s", peer.Address)
 		for {
 			if pm.Contains(peer.ID) || i > option.ReconnectTimes {
 				break
 			}
+			log.Debugf("peer manager try connect : %s %s(%d)", peer.ID, peer.Address, i+1)
 			if conn, err := net.Dial("tcp4", peer.Address); err == nil {
-				pm.Add(conn, protocol)
+				if _, err := pm.Add(conn, protocol); err != nil {
+					log.Warnf("peer manager try connect : %s(%d) --- %s", peer.Address, i+1, err)
+					conn.Close()
+				}
 				break
 			}
 			t := time.NewTimer(option.ReconnectInterval)

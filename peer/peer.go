@@ -59,7 +59,7 @@ var TypeName = map[uint32]string{
 type PeerID []byte
 
 func (p PeerID) String() string {
-	return fmt.Sprintf("%s:%s", option.ChainID, hex.EncodeToString(p))
+	return fmt.Sprintf("%s", hex.EncodeToString(p))
 }
 
 const (
@@ -118,17 +118,15 @@ func (peer *Peer) Stop() {
 		log.Warnf("Peer %s(%s->%s) already stopped.", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 		return
 	}
-	peer.cancel()
-	peer.waitGroup.Wait()
-	log.Infoln("Peer %s(%s->%s) Stopped", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
-}
-
-func (peer *Peer) stop() {
 	peer.peerManager.remove(peer.conn)
 	peer.conn.Close()
+	peer.cancel()
+	peer.waitGroup.Wait()
+
 	peer.conn = nil
 	peer.cancel = nil
 	peer.sendChannel = make(chan *proto.Message)
+	log.Infoln("Peer %s(%s->%s) Stopped", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 }
 
 func (peer *Peer) SendMsg(msg *proto.Message) error {
@@ -175,9 +173,8 @@ func (peer *Peer) ParsePeer(rawurl string) error {
 }
 
 func (peer *Peer) recv(ctx context.Context) {
-	defer peer.stop()
-
 	defer peer.waitGroup.Done()
+	defer peer.peerManager.Remove(peer.conn)
 	headerSize := 4
 	for {
 		select {
@@ -188,6 +185,10 @@ func (peer *Peer) recv(ctx context.Context) {
 		//head
 		headerBytes := make([]byte, headerSize)
 		if n, err := peer.conn.Read(headerBytes); err != nil {
+			if err == io.EOF {
+				log.Debugf("Peer %s(%s->%s) received close --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
+				return
+			}
 			log.Errorf("Peer %s(%s->%s) conn read header --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return
 		} else if n != headerSize {
@@ -199,7 +200,7 @@ func (peer *Peer) recv(ctx context.Context) {
 		dataSize := binary.LittleEndian.Uint32(headerBytes)
 		if dataSize > maxMsgSize {
 			err := fmt.Errorf("message too big")
-			log.Errorf("Peer %s(%s->%s) conn read header --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
+			log.Errorf("Peer %s(%s->%s) conn read datasize --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return
 		}
 		data := make([]byte, dataSize)
@@ -361,6 +362,7 @@ func (peer *Peer) loop(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-keepAliveTimer.C:
+			log.Infof("Peers %d", len(peer.peerManager.peers))
 			keepAliveTimer.Stop()
 			if time.Now().Sub(peer.lastActiveTime) > option.KeepAliveInterval {
 				header := &proto.Header{
