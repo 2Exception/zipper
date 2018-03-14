@@ -30,6 +30,7 @@ import (
 	"github.com/zipper-project/zipper/blockchain/protoManager"
 	"github.com/zipper-project/zipper/common/log"
 	"github.com/zipper-project/zipper/config"
+	"github.com/zipper-project/zipper/rpc"
 )
 
 // Node represents the blockchain zipper
@@ -48,6 +49,7 @@ func NewNode(cfgFile string) *Node {
 	cfg := config.NodeOption()
 	log.New(cfg.LogFile)
 	log.SetLevel(cfg.LogLevel)
+	log.SetOutput(os.Stdout)
 	config.VMConfig(cfg.LogFile, cfg.LogLevel)
 	pm := protoManager.NewProtoManager()
 	node := &Node{
@@ -89,6 +91,7 @@ func (node *Node) Start() {
 		}()
 	}
 
+	go rpc.StartServer(rpc.NewServer(node.bc), config.RPCConfig())
 	node.bc.Start()
 
 	<-abort

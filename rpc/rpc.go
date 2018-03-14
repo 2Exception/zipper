@@ -15,3 +15,45 @@
 // You should have received a copy of the ISC License
 // along with this program.  If not, see <https://opensource.org/licenses/isc>.
 package rpc
+
+import (
+	"errors"
+	"github.com/zipper-project/zipper/blockchain"
+	"github.com/zipper-project/zipper/proto"
+	"github.com/zipper-project/zipper/common/log"
+	"encoding/hex"
+)
+
+type RPCTransaction struct {
+	bc *blockchain.Blockchain
+}
+
+func NewRPCTransaction(bc *blockchain.Blockchain) *RPCTransaction {
+	return &RPCTransaction{
+		bc: bc,
+	}
+}
+
+func (rt *RPCTransaction) Broadcast(txHex string, reply *string) error {
+	if len(txHex) < 1 {
+		return errors.New("Invalid Params: len(txSerializeData) must be >0 ")
+	}
+
+	tx := new(proto.Transaction)
+	txByte, _ := hex.DecodeString(txHex)
+	err := tx.Deserialize(txByte)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("====>>>>: %+v", tx)
+	_, err = tx.Verfiy()
+	if err != nil {
+		log.Errorf("Tx Verfiy err: %+v", err)
+		return errors.New("Invalid Tx, varify the signature of Tx failed")
+	}
+
+
+	rt.bc.Relay(tx)
+	return nil
+}

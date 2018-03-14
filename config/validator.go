@@ -29,5 +29,7 @@ func ValidatorConfig() *validator.Config {
 	config.TxPoolCapacity = getInt("validator.txpool.capacity", config.TxPoolCapacity)
 	config.TxPoolTimeOut = getDuration("validator.txpool.timeout", config.TxPoolTimeOut)
 	config.TxPoolDelay = getInt("validator.txpool.txdelay", config.TxPoolDelay)
+	config.TxPoolDelay = getInt("validator.txpool.txdelay", config.TxPoolDelay)
+	config.PublicAddresses = getStringSlice("validator.issueaddr", []string{})
 	return config
 }

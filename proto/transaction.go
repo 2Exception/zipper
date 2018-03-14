@@ -25,6 +25,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/zipper-project/zipper/account"
 	"github.com/zipper-project/zipper/common/crypto"
+	"github.com/zipper-project/zipper/common/log"
 )
 
 var (
@@ -95,6 +96,16 @@ func (tx *Transaction) Deserialize(data []byte) error {
 	return proto.Unmarshal(data, tx)
 }
 
+// WithSignature returns a new transaction with the given signature.
+func (tx *Transaction) WithSignature(sig *crypto.Signature) {
+	var err error
+	tx.Header.Signature, err = sig.MarshalText()
+	if err != nil {
+		tx.Header.Signature = nil
+		log.Errorf("Append withSignature err: %+v", err)
+	}
+}
+
 // Verfiy Also can use this method verify signature
 func (tx *Transaction) Verfiy() (account.Address, error) {
 	var (
@@ -108,7 +119,11 @@ func (tx *Transaction) Verfiy() (account.Address, error) {
 	case TransactionType_Issue:
 		if tx.Header.Signature != nil {
 			sig := &crypto.Signature{}
-			sig.SetBytes(tx.Header.Signature, false)
+			err := sig.UnmarshalText(tx.Header.Signature)
+			if err != nil {
+				return a, err
+			}
+			//sig.SetBytes(tx.Header.Signature, false)
 			p, err := sig.RecoverPublicKey(tx.SignHash().Bytes())
 			if err != nil {
 				return a, err

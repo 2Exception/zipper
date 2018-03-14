@@ -28,9 +28,8 @@ const (
 
 // ChainID  chain ID
 var (
-	ChainID       = coordinate.NewChainCoordinate([]byte{0, 1, 3})
+	ChainID       = coordinate.NewChainCoordinate([]byte{0})
 	PeerID        string
-	PublicAddress []string
 	ConnNums      int
 	LocalIp       string
 	Nvp           bool

@@ -15,31 +15,24 @@
 // You should have received a copy of the ISC License
 // along with this program.  If not, see <https://opensource.org/licenses/isc>.
 
-package validator
+package rpc
 
-import "time"
+import (
+	"github.com/zipper-project/zipper/blockchain"
+)
 
-type Config struct {
-	IsValid           bool
-	TxPoolCapacity    int
-	TxPoolDelay       int
-	MaxWorker         int
-	MaxQueue          int
-	TxPoolTimeOut     time.Duration
-	BlacklistDur      time.Duration
-	SecurityPluginDir string
-	PublicAddresses     []string
+type RPCLedger struct {
+	bc *blockchain.Blockchain
 }
 
-func DefaultConfig() *Config {
-	return &Config{
-		IsValid:        true,
-		TxPoolCapacity: 200000,
-		TxPoolDelay:    5000,
-		MaxWorker:      10,
-		MaxQueue:       2000,
-		TxPoolTimeOut:  30 * time.Minute,
-		BlacklistDur:   1 * time.Minute,
-		PublicAddresses: []string{},
+func NewRPCLedger(bc *blockchain.Blockchain) *RPCLedger {
+	return &RPCLedger{
+		bc: bc,
 	}
+}
+
+func (rl *RPCLedger) GetChainHeight(ignore string, reply *uint32) error {
+	height := rl.bc.CurrentHeight()
+	*reply = height
+	return nil
 }
