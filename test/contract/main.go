@@ -103,15 +103,14 @@ var (
 		langLua,
 		false,
 		nil,
-		[]string{"vote", "张三", "秦皇岛"})
+		[]string{"vote", "chain", "england"})
 
 	coinLua = newContractConf(
-		"./l0coin.lua",
+		"./template.lua",
 		langLua,
 		false,
 		nil,
 		[]string{"transfer", "8ce1bb0858e71b50d603ebe4bec95b11d8833e68", "100"})
-	//[]string{"testwrite", "8ce1bb0858e71b50d603ebe4bec95b11d8833e68", "100"})
 
 	coinJS = newContractConf(
 		"./template.js",
@@ -142,7 +141,10 @@ func main() {
 	//issueTX()
 	//transferTx()
 	//testSecurityContract()
+	time.Sleep(time.Second * 5)
 	deploySmartContractTX(coinJS)
+	time.Sleep(time.Second * 5)
+	deploySmartContractTX(coinLua)
 	// time.Sleep(10 * time.Second)
 	// execSmartContractTX(coinJS)
 
