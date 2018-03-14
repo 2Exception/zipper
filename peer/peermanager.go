@@ -41,8 +41,8 @@ func NewPeerManager() *PeerManager {
 }
 
 func (pm *PeerManager) Stop() {
-	pm.RLock()
-	defer pm.RUnlock()
+	pm.Lock()
+	defer pm.Unlock()
 	for _, peer := range pm.peers {
 		peer.Stop()
 	}
@@ -110,10 +110,6 @@ func (pm *PeerManager) Connect(peer *Peer, protocol IProtocolManager) {
 
 	if len(pm.peers) >= option.MaxPeers {
 		log.Warnf("connected peer more than max peers.")
-		return
-	}
-	if pm.Contains(peer.ID) {
-		log.Warnf("peer [%s] already connected", peer.ID)
 		return
 	}
 	if peer.Address == "" || strings.HasPrefix(peer.Address, ":") {

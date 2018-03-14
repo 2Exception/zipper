@@ -52,9 +52,9 @@ var option = &Option{
 	ListenAddress:     ":20166",
 	DeadLine:          time.Second,
 	PrivateKey:        nil,
-	ReconnectInterval: 30 * time.Second,
-	ReconnectTimes:    3,
-	KeepAliveInterval: 15 * time.Second,
+	ReconnectInterval: 1 * time.Second,
+	ReconnectTimes:    10,
+	KeepAliveInterval: 5 * time.Second,
 	KeepAliveTimes:    30,
 	MaxPeers:          8,
 	MinPeers:          3,
@@ -110,6 +110,7 @@ func (srv *Server) Start() {
 	for _, bNode := range srv.option.BootstrapNodes {
 		peer := &Peer{}
 		if err := peer.ParsePeer(bNode); err != nil {
+			log.Errorf("parse peer %s error --- %s", bNode, err)
 			continue
 		}
 		srv.peerManager.Connect(peer, srv.protocol)
@@ -172,7 +173,7 @@ func (srv *Server) Stop() {
 	srv.cancel()
 	srv.waitGroup.Wait()
 	srv.cancel = nil
-	//srv.peerManager.Stop()
+	srv.peerManager.Stop()
 	log.Infoln("Server Stopped")
 }
 

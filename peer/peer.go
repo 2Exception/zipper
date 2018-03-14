@@ -62,13 +62,13 @@ func (p PeerID) String() string {
 }
 
 const (
-	BASE      = 0
-	HANDSHAKE = iota + BASE*100
-	HANDSHAKEACK
-	PING
-	PONG
-	PEERS
-	PEERSACK
+	BASE         = 0
+	HANDSHAKE    = iota + BASE*100 // 1
+	HANDSHAKEACK                   // 2
+	PING                           // 3
+	PONG                           // 4
+	PEERS                          // 5
+	PEERSACK                       // 6
 )
 
 // Peer represents a peer in blockchain
@@ -113,18 +113,21 @@ func (peer *Peer) Start() {
 }
 
 func (peer *Peer) Stop() {
+	peer.peerManager.remove(peer.conn)
+	peer.conn.Close()
+}
+
+func (peer *Peer) stop() {
 	if peer.cancel == nil {
 		log.Warnf("Peer %s(%s->%s) already stopped.", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 		return
 	}
-	peer.peerManager.remove(peer.conn)
-	peer.conn.Close()
+	peer.peerManager.Remove(peer.conn)
+	peer.sendChannel = make(chan *proto.Message)
 	peer.cancel()
 	peer.waitGroup.Wait()
-
 	peer.conn = nil
 	peer.cancel = nil
-	peer.sendChannel = make(chan *proto.Message)
 	log.Infoln("Peer %s(%s->%s) Stopped", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 }
 
@@ -172,8 +175,8 @@ func (peer *Peer) ParsePeer(rawurl string) error {
 }
 
 func (peer *Peer) recv(ctx context.Context) {
+	defer peer.stop()
 	defer peer.waitGroup.Done()
-	defer peer.peerManager.Remove(peer.conn)
 	headerSize := 4
 	for {
 		select {
@@ -181,12 +184,15 @@ func (peer *Peer) recv(ctx context.Context) {
 			return
 		default:
 		}
+		peer.conn.SetReadDeadline(time.Now().Add(option.DeadLine))
 		//head
 		headerBytes := make([]byte, headerSize)
 		if n, err := peer.conn.Read(headerBytes); err != nil {
 			if err == io.EOF {
 				log.Debugf("Peer %s(%s->%s) received close --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 				return
+			} else if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+				continue
 			}
 			log.Errorf("Peer %s(%s->%s) conn read header --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return
