@@ -134,17 +134,16 @@ func (srv *Server) listen(ctx context.Context, addr string) (err error) {
 		return
 	}
 
-	log.Debugf("listen connection ...")
+	log.Debugf("listening %s...", addr)
 
 	defer listener.Close()
-	listener.SetDeadline(time.Now().Add(srv.option.DeadLine))
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
 		}
-
+		listener.SetDeadline(time.Now().Add(srv.option.DeadLine))
 		if conn, err = listener.AcceptTCP(); err != nil {
 			if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
 				continue

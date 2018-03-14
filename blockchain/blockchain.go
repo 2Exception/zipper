@@ -130,7 +130,7 @@ func (bc *Blockchain) Start() {
 		bc.StartServices()
 	}
 	go bc.server.Start()
-	go func() {
+	blockChainLoop := func() {
 		for {
 			select {
 			case <-bc.quitCh:
@@ -176,7 +176,8 @@ func (bc *Blockchain) Start() {
 				}*/
 			}
 		}
-	}()
+	}
+	go blockChainLoop()
 }
 
 func (bc *Blockchain) Stop() {
