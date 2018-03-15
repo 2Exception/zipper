@@ -24,6 +24,7 @@ import (
 )
 
 type IProtocolManager interface {
+	CreateStatusMsg() (*proto.Message, error)
 	Handle(*Peer, *proto.Message) error
 	RegisterWorker(protocalID mproto.ProtoID, workers []mpool.VmWorker) error
 }

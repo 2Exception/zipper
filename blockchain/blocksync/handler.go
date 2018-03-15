@@ -42,6 +42,7 @@ type SyncWorker struct {
 func (worker *SyncWorker) VmJob(data interface{}) (interface{}, error) {
 	workerData := data.(types.WorkerData)
 	msg := workerData.GetMsg()
+	log.Debugf("========================> syncWorker ID: %+v", msg.Header.MsgID)
 	switch proto.MsgType(msg.Header.MsgID) {
 	case proto.MsgType_BC_OnStatusMSg:
 		worker.OnStatus(workerData)

@@ -132,7 +132,9 @@ func (peer *Peer) stop() {
 }
 
 func (peer *Peer) SendMsg(msg *proto.Message) error {
-	log.Debugf("Peer %s(%s->%s) send msg %d/%d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.ProtoID, msg.Header.MsgID)
+	if msg.Header.MsgID != PING && msg.Header.MsgID != PONG {
+		log.Debugf("Peer %s(%s->%s) send msg %d/%d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.ProtoID, msg.Header.MsgID)
+	}
 	select {
 	case peer.sendChannel <- msg:
 		return nil
@@ -224,7 +226,9 @@ func (peer *Peer) recv(ctx context.Context) {
 			log.Errorf("Peer %s(%s->%s) conn read data --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return
 		}
-		log.Debugf("Peer %s(%s->%s) handle msg %d/%d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.ProtoID, msg.Header.MsgID)
+		if msg.Header.MsgID != PING && msg.Header.MsgID != PONG {
+			log.Debugf("Peer %s(%s->%s) handle msg %d/%d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.ProtoID, msg.Header.MsgID)
+		}
 
 		if !peer.handshaked {
 			switch msg.Header.MsgID {

@@ -27,9 +27,12 @@ import (
 	"github.com/zipper-project/zipper/peer/proto"
 	mproto "github.com/zipper-project/zipper/proto"
 	"github.com/zipper-project/zipper/types"
+	"github.com/zipper-project/zipper/common/log"
+	"github.com/zipper-project/zipper/blockchain"
 )
 
 type ProtoManager struct {
+	bc *blockchain.Blockchain
 	sync.Mutex
 	wm map[mproto.ProtoID]*mpool.VirtualMachine
 }
@@ -40,6 +43,10 @@ func NewProtoManager() *ProtoManager {
 	}
 }
 
+func (pm *ProtoManager) SetBlockChain(bc *blockchain.Blockchain) {
+	pm.bc = bc
+}
+
 func (pm *ProtoManager) RegisterWorker(protocalID mproto.ProtoID, workers []mpool.VmWorker) error {
 	pm.Lock()
 	defer pm.Unlock()
@@ -48,8 +55,29 @@ func (pm *ProtoManager) RegisterWorker(protocalID mproto.ProtoID, workers []mpoo
 		return fmt.Errorf("wm: %s have beed registered", protocalID)
 	}
 
+	log.Debugf("=======> protoManager. ProtoID: %+v", protocalID)
 	pm.wm[protocalID] = mpool.CreateCustomVM(workers)
 	return nil
+}
+
+func (pm *ProtoManager) CreateStatusMsg() (*proto.Message, error) {
+	statusMsg := &mproto.StatusMsg{
+		Version: 1,
+		StartHeight: pm.bc.CurrentHeight(),
+	}
+
+	statusMsgData, err := statusMsg.MarshalMsg()
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.Message{
+		Header:&proto.Header{
+			ProtoID: uint32(mproto.ProtoID_SyncWorker),
+			MsgID: uint32(mproto.MsgType_BC_OnStatusMSg),
+		},
+		Payload: statusMsgData,
+	}, nil
 }
 
 func (pm *ProtoManager) Handle(sendPeer *peer.Peer, msg *proto.Message) error {

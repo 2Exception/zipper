@@ -139,9 +139,10 @@ func main() {
 	time.Sleep(1 * time.Microsecond)
 
 	issueTX()
+	time.Sleep(10)
 	//transferTx()
 	//testSecurityContract()
-	for i:=0; i<100000; i++ {
+	for i:=0; i<0; i++ {
 		time.Sleep(time.Second * 1)
 		deploySmartContractTX(coinJS)
 		time.Sleep(time.Second * 1)
