@@ -100,7 +100,7 @@ func (worker *SyncWorker) OnStatus(workerData types.WorkerData) {
 			HashStop:      crypto.Hash{}.String(),
 		}
 
-		worker.SendMsg(workerData.GetSendPeer(), 1, 1, getBlocksMsg)
+		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_OnStatusMSg, getBlocksMsg)
 	} else if !worker.bc.Started() {
 		worker.bc.Start()
 	}
@@ -142,7 +142,7 @@ func (worker *SyncWorker) OnGetBlocks(workerData types.WorkerData) {
 			Hashs: hashes,
 		}
 
-		worker.SendMsg(workerData.GetSendPeer(), 1, 1, getInvMsg)
+		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_GetInvMsg, getInvMsg)
 	}
 }
 
@@ -180,7 +180,7 @@ func (worker *SyncWorker) OnGetInv(workerData types.WorkerData) {
 		getDataMsg := &proto.GetDataMsg{}
 		getDataMsg.InvList[0].Hashs = hashes
 
-		worker.SendMsg(workerData.GetSendPeer(), 1, 1, getDataMsg)
+		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_GetDataMsg, getDataMsg)
 	}
 }
 
@@ -209,7 +209,7 @@ func (worker *SyncWorker) OnGetData(workerData types.WorkerData) {
 						},
 					}
 
-					worker.SendMsg(workerData.GetSendPeer(), 1, 1, blockMsg)
+					worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_OnBlockMsg, blockMsg)
 				}
 			}
 		case proto.InvType_transaction:
@@ -219,7 +219,7 @@ func (worker *SyncWorker) OnGetData(workerData types.WorkerData) {
 						Transaction: tx,
 					}
 
-					worker.SendMsg(workerData.GetSendPeer(), 1, 1, txMsg)
+					worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_OnTransactionMsg, txMsg)
 				}
 			}
 		default:
@@ -242,7 +242,7 @@ func (worker *SyncWorker) OnBlock(workerData types.WorkerData) {
 			HashStop:      crypto.Hash{}.String(),
 		}
 
-		worker.SendMsg(workerData.GetSendPeer(), 1, 1, getBlocksMsg)
+		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_GetBlocksMsg, getBlocksMsg)
 	} else {
 		worker.bc.Relay(blockMsg.Block)
 		if !worker.bc.Started() && worker.bc.CurrentHeight() == worker.expectedHeight {
@@ -261,10 +261,10 @@ func (worker *SyncWorker) OnTransaction(workerData types.WorkerData) {
 	worker.bc.Relay(txMsg.Transaction)
 }
 
-func (worker *SyncWorker) SendMsg(peer *peer.Peer, protoID, msgID uint32, imsg proto.IMsg) error {
+func (worker *SyncWorker) SendMsg(peer *peer.Peer, protoID proto.ProtoID, msgID proto.MsgType, imsg proto.IMsg) error {
 	msg := &msgProto.Message{}
-	msg.Header.ProtoID = protoID
-	msg.Header.MsgID = msgID
+	msg.Header.ProtoID = uint32(protoID)
+	msg.Header.MsgID = uint32(msgID)
 
 	imsgByte, err := imsg.MarshalMsg()
 	if err != nil {
