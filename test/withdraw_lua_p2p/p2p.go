@@ -20,11 +20,13 @@ package main
 
 import (
 	"github.com/zipper-project/zipper/peer"
+	p2p "github.com/zipper-project/zipper/peer/proto"
 	"github.com/zipper-project/zipper/proto"
 )
 
 var (
-	srv *peer.Server
+	srv        *peer.Server
+	targetPeer *peer.Peer
 )
 
 func init() {
@@ -33,10 +35,14 @@ func init() {
 	option.BootstrapNodes = []string{"encode://303030315f616263@127.0.0.1:20166&1"}
 	option.PeerID = []byte("0005_abc")
 	srv = peer.NewServer(option, nil)
+	targetPeer = &peer.Peer{}
+	targetPeer.ParsePeer("encode://303030315f616263@127.0.0.1:20166&1")
 }
 
 func Relay(tx *proto.Transaction) {
-	//TODO
-	//msg := p2p.NewMessage(nil, nil)
-	//srv.Broadcast(msg, peer.VP)
+	header := &p2p.Header{}
+	header.ProtoID = 1
+	header.MsgID = uint32(proto.MsgType_BC_OnTransactionMsg)
+	msg := p2p.NewMessage(header, tx.Serialize())
+	srv.Unicast(msg, targetPeer.ID)
 }

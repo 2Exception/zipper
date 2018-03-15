@@ -181,3 +181,8 @@ func (srv *Server) Stop() {
 func (srv *Server) Broadcast(msg *proto.Message, tp uint32) {
 	srv.peerManager.Broadcast(msg, tp)
 }
+
+// Unicast broadcasts message to remote peers
+func (srv *Server) Unicast(msg *proto.Message, peerID []byte) {
+	srv.peerManager.Unicast(msg, peerID)
+}

@@ -58,6 +58,17 @@ func (pm *PeerManager) Broadcast(msg *proto.Message, tp uint32) {
 	}
 }
 
+func (pm *PeerManager) Unicast(msg *proto.Message, peerID []byte) {
+	pm.RLock()
+	defer pm.RUnlock()
+	for _, peer := range pm.peers {
+		if bytes.Equal(peer.ID, peerID) {
+			peer.SendMsg(msg)
+			break
+		}
+	}
+}
+
 func (pm *PeerManager) IterFunc(function func(peer *Peer)) {
 	pm.RLock()
 	defer pm.RUnlock()

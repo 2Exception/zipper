@@ -20,6 +20,7 @@ package commands
 import (
 	"fmt"
 	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/zipper-project/zipper/node"
 )
@@ -51,5 +52,5 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/zipper.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/zipper.yaml)")
 }
