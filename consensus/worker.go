@@ -28,7 +28,7 @@ func NewConsensusWorker(consenter Consenter) *ConsensusWorker {
 }
 
 func GetSyncWorkers(workerNums int, consenter Consenter) []mpool.VmWorker {
-	cssWorkers := make([]mpool.VmWorker, workerNums)
+	cssWorkers := make([]mpool.VmWorker, 0)
 	for i := 0; i < workerNums; i++ {
 		cssWorkers = append(cssWorkers, NewConsensusWorker(consenter))
 	}

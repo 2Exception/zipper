@@ -23,6 +23,7 @@ import (
 	"errors"
 	"reflect"
 	"sync/atomic"
+	"github.com/zipper-project/zipper/common/log"
 )
 
 // start vm(lua and js service according to configure)
@@ -73,6 +74,7 @@ func (vm *VirtualMachine) Open(name string) (*VirtualMachine, error) {
 		vm.selects = make([]reflect.SelectCase, len(vm.workers))
 
 		for i, workerWrapper := range vm.workers {
+			log.Debugf("len(vm.workers: %+v, %+v", len(vm.workers), workerWrapper)
 			workerWrapper.Open()
 			vm.selects[i] = reflect.SelectCase{
 				Dir: reflect.SelectRecv,

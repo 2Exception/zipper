@@ -75,7 +75,7 @@ func NewSyncWorker(ledger *ledger.Ledger, bc *blockchain.Blockchain) *SyncWorker
 }
 
 func GetSyncWorkers(workerNums int, bc *blockchain.Blockchain)  []mpool.VmWorker {
-	cssWorkers := make([]mpool.VmWorker, workerNums)
+	cssWorkers := make([]mpool.VmWorker, 0)
 	for i := 0; i < workerNums; i++ {
 		cssWorkers = append(cssWorkers, NewSyncWorker(bc.GetLedger(), bc))
 	}
