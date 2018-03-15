@@ -126,13 +126,13 @@ func (peer *Peer) stop() {
 	peer.sendChannel = make(chan *proto.Message)
 	peer.cancel()
 	peer.waitGroup.Wait()
+	log.Infof("Peer %s(%s->%s) Stopped", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 	peer.conn = nil
 	peer.cancel = nil
-	log.Infoln("Peer %s(%s->%s) Stopped", peer.String(), peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String())
 }
 
 func (peer *Peer) SendMsg(msg *proto.Message) error {
-	log.Debugf("Peer %s(%s->%s) send msg %d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.MsgID)
+	//log.Debugf("Peer %s(%s->%s) send msg %d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.MsgID)
 	select {
 	case peer.sendChannel <- msg:
 		return nil
@@ -224,7 +224,7 @@ func (peer *Peer) recv(ctx context.Context) {
 			log.Errorf("Peer %s(%s->%s) conn read data --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return
 		}
-		log.Debugf("Peer %s(%s->%s) handle msg %d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.MsgID)
+		//log.Debugf("Peer %s(%s->%s) handle msg %d", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.MsgID)
 
 		if !peer.handshaked {
 			switch msg.Header.MsgID {
