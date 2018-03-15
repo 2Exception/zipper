@@ -23,6 +23,11 @@ import (
 	"github.com/zipper-project/zipper/peer"
 )
 
+const (
+	SyncWorkerProtoID = 1  // include transaction handler
+	ConsensusWorkerProtoID = 2
+)
+
 type WorkerData struct {
 	msg *proto.Message
 	sendPeer *peer.Peer

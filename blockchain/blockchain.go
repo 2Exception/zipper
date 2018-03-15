@@ -122,6 +122,7 @@ func NewBlockchain(pm peer.IProtocolManager) *Blockchain {
 
 	log.Debugf("start: peer.NewServer...")
 	bc.server = peer.NewServer(config.ServerOption(), pm)
+
 	return bc
 }
 
@@ -189,6 +190,14 @@ func (bc *Blockchain) Stop() {
 // CurrentHeight returns current heigt of the current block
 func (bc *Blockchain) CurrentHeight() uint32 {
 	return bc.currentBlockHeader.Height
+}
+
+func (bc *Blockchain) GetConsenter() consensus.Consenter {
+	return bc.consenter
+}
+
+func (bc *Blockchain) GetLedger() *ledger.Ledger {
+	return bc.ledger
 }
 
 // CurrentBlockHash returns current block hash of the current block
