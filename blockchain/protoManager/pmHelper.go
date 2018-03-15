@@ -56,7 +56,12 @@ func (pm *ProtoManager) RegisterWorker(protocalID mproto.ProtoID, workers []mpoo
 	}
 
 	log.Debugf("=======> protoManager. ProtoID: %+v", protocalID)
-	pm.wm[protocalID] = mpool.CreateCustomVM(workers)
+	vm := mpool.CreateCustomVM(workers)
+	_, err := vm.Open(string(uint32(protocalID)))
+	if err != nil {
+		return err
+	}
+	pm.wm[protocalID] = vm
 	return nil
 }
 
