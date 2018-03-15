@@ -25,21 +25,22 @@ import (
 	"github.com/zipper-project/zipper/common/mpool"
 	"github.com/zipper-project/zipper/peer"
 	"github.com/zipper-project/zipper/peer/proto"
+	mproto "github.com/zipper-project/zipper/proto"
 	"github.com/zipper-project/zipper/types"
 )
 
 type ProtoManager struct {
 	sync.Mutex
-	wm map[uint32]*mpool.VirtualMachine
+	wm map[mproto.ProtoID]*mpool.VirtualMachine
 }
 
 func NewProtoManager() *ProtoManager {
 	return &ProtoManager{
-		wm: make(map[uint32]*mpool.VirtualMachine),
+		wm: make(map[mproto.ProtoID]*mpool.VirtualMachine),
 	}
 }
 
-func (pm *ProtoManager) RegisterWorker(protocalID uint32, workers []mpool.VmWorker) error {
+func (pm *ProtoManager) RegisterWorker(protocalID mproto.ProtoID, workers []mpool.VmWorker) error {
 	pm.Lock()
 	defer pm.Unlock()
 
@@ -55,7 +56,7 @@ func (pm *ProtoManager) Handle(sendPeer *peer.Peer, msg *proto.Message) error {
 	pm.Lock()
 	defer pm.Unlock()
 
-	err := pm.wm[msg.Header.ProtoID].SendWorkCleanAsync(types.NewWorkerData(sendPeer, msg))
+	err := pm.wm[mproto.ProtoID(msg.Header.ProtoID)].SendWorkCleanAsync(types.NewWorkerData(sendPeer, msg))
 	return err
 }
 

@@ -138,16 +138,17 @@ func main() {
 	go sendTransaction()
 	time.Sleep(1 * time.Microsecond)
 
-	//issueTX()
+	issueTX()
 	//transferTx()
 	//testSecurityContract()
-	time.Sleep(time.Second * 5)
-	deploySmartContractTX(coinJS)
-	time.Sleep(time.Second * 5)
-	deploySmartContractTX(coinLua)
+	for i:=0; i<100000; i++ {
+		time.Sleep(time.Second * 1)
+		deploySmartContractTX(coinJS)
+		time.Sleep(time.Second * 1)
+		deploySmartContractTX(coinLua)
 	// time.Sleep(10 * time.Second)
 	// execSmartContractTX(coinJS)
-
+	}
 	ch := make(chan struct{})
 	<-ch
 }
@@ -200,7 +201,7 @@ func issueTX() {
 		issueSender,
 		sender,
 		1,
-		1000,
+		1000000000,
 		1,
 		uint32(time.Now().Unix()),
 	)
@@ -231,7 +232,7 @@ func transferTx() {
 		sender,
 		receiver,
 		1,
-		1000,
+		10,
 		1,
 		uint32(time.Now().Unix()),
 	)
@@ -266,7 +267,7 @@ func deploySmartContractTX(conf *contractConf) []byte {
 		sender,
 		account.NewAddress(contractSpec.Addr),
 		1,
-		100,
+		10,
 		0,
 		uint32(time.Now().Unix()),
 	)

@@ -33,7 +33,7 @@ validator:
 
 #consensus
 consensus:
-  plugin: "noops"
+  plugin: "scip"
 
   noops:
     batchSize: 10000

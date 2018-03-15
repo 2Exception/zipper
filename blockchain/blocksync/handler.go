@@ -30,8 +30,7 @@ import (
 	msgProto "github.com/zipper-project/zipper/peer/proto"
 	"github.com/zipper-project/zipper/proto"
 	"github.com/zipper-project/zipper/types"
-	"github.com/yuin/gopher-lua/pm"
-	"golang.org/x/tools/go/gcimporter15/testdata"
+	"github.com/zipper-project/zipper/common/mpool"
 )
 
 type SyncWorker struct {
@@ -74,13 +73,13 @@ func NewSyncWorker(ledger *ledger.Ledger, bc *blockchain.Blockchain) *SyncWorker
 	}
 }
 
-func SetSyncWorkers(workerNums int, ledger *ledger.Ledger, bc *blockchain.Blockchain) []*SyncWorker {
-	var txWorkers []*SyncWorker
+func GetSyncWorkers(workerNums int, bc *blockchain.Blockchain)  []mpool.VmWorker {
+	cssWorkers := make([]mpool.VmWorker, workerNums)
 	for i := 0; i < workerNums; i++ {
-		txWorkers = append(txWorkers, NewSyncWorker(ledger, bc))
+		cssWorkers = append(cssWorkers, NewSyncWorker(bc.GetLedger(), bc))
 	}
 
-	return txWorkers
+	return cssWorkers
 }
 
 func (worker *SyncWorker) OnStatus(workerData types.WorkerData) {

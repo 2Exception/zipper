@@ -17,8 +17,13 @@
 
 package peer
 
-import "github.com/zipper-project/zipper/peer/proto"
+import (
+	"github.com/zipper-project/zipper/peer/proto"
+	mproto "github.com/zipper-project/zipper/proto"
+	"github.com/zipper-project/zipper/common/mpool"
+)
 
 type IProtocolManager interface {
 	Handle(*Peer, *proto.Message) error
+	RegisterWorker(protocalID mproto.ProtoID, workers []mpool.VmWorker) error
 }
