@@ -41,7 +41,7 @@ func init() {
 
 func Relay(tx *proto.Transaction) {
 	header := &p2p.Header{}
-	header.ProtoID = 1
+	header.ProtoID = uint32(proto.ProtoID_SyncWorker)
 	header.MsgID = uint32(proto.MsgType_BC_OnTransactionMsg)
 	msg := p2p.NewMessage(header, tx.Serialize())
 	srv.Unicast(msg, targetPeer.ID)

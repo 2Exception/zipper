@@ -139,8 +139,8 @@ func (bc *Blockchain) Start() {
 			case broadcastConsensusData := <-bc.consenter.BroadcastConsensusChannel():
 				//TODO
 				header := &p2p.Header{}
-				header.ProtoID = 2
-				header.MsgID = uint32(proto.MSGTYPE_BC_CONSENSUS)
+				header.ProtoID = uint32(proto.ProtoID_ConsensusWorker)
+				header.MsgID = uint32(proto.MsgType_BC_OnConsensusMSg)
 				msg := p2p.NewMessage(header, broadcastConsensusData.Payload)
 				bc.server.Broadcast(msg, peer.VP)
 			case commitedTxs := <-bc.consenter.OutputTxsChannel():
@@ -361,7 +361,7 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 		if bc.ProcessTransaction(tx, true) {
 			log.Debugf("ProcessTransaction, tx_hash: %+v", tx.Hash())
 			header := &p2p.Header{}
-			header.ProtoID = 1
+			header.ProtoID = uint32(proto.ProtoID_SyncWorker)
 			header.MsgID = uint32(proto.MsgType_BC_OnTransactionMsg)
 			msg = p2p.NewMessage(header, inv.Serialize())
 			bc.server.Broadcast(msg, peer.NVP)
@@ -380,7 +380,7 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 			invMsg.Hashs = []string{inv.Hash().String()}
 
 			header := &p2p.Header{}
-			header.ProtoID = 1
+			header.ProtoID = uint32(proto.ProtoID_SyncWorker)
 			header.MsgID = uint32(proto.MsgType_BC_GetInvMsg)
 			imsgByte, _ := invMsg.MarshalMsg()
 			msg = p2p.NewMessage(header, imsgByte)

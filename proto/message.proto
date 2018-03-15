@@ -6,8 +6,9 @@ import "block.proto";
 import "transaction.proto";
 
 enum ProtoID {
-    SyncWorker = 0;  // include transaction handler
-    ConsensusWorker = 1;
+    NA = 0;
+    SyncWorker = 1;  // include transaction handler
+    ConsensusWorker = 2;
 }
 
 enum MsgType {
@@ -17,6 +18,7 @@ enum MsgType {
     BC_OnBlockMsg = 3;
     BC_OnTransactionMsg = 4;
     BC_OnStatusMSg = 5;
+    BC_OnConsensusMSg = 6;
 }
 
 message GetBlocksMsg {
