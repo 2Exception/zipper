@@ -222,5 +222,5 @@ func sendTransaction(tx *proto.Transaction) {
 	fmt.Printf("%s hash: %s, sender: %v, receiver: %v, assetID: %v, amount: %v\n", time.Now().Format("2006-01-02 15:04:05"),
 		tx.Hash().String(), tx.Sender(), tx.Recipient(), tx.AssetID(), tx.Amount())
 	httpPost(`{"id":1,"method":"RPCTransaction.Broadcast","params":["`+hex.EncodeToString(tx.Serialize())+`"]}`, nil)
-
+	time.Sleep(5 * time.Second)
 }

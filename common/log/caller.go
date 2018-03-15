@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	depth = 9
+	depth = 10
 )
 
 // CallerHook represents a caller hook of logrus

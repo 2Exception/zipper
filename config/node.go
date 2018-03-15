@@ -15,7 +15,6 @@
 // You should have received a copy of the ISC License
 // along with this program.  If not, see <https://opensource.org/licenses/isc>.
 
-
 package config
 
 import "path/filepath"
@@ -33,7 +32,7 @@ type Option struct {
 func NewDefaultOption() *Option {
 	return &Option{
 		LogLevel: "debug",
-		LogFile:  "node.log",
+		LogFile:  "zipper.log",
 	}
 }
 

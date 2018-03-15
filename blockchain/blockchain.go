@@ -374,7 +374,7 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 		}
 
 		if bc.ProcessBlock(block, true) {
-			log.Debugf("ProcessTransaction, blk_hash: %+v %v", block.Hash())
+			log.Debugf("ProcessTransaction, blk_hash: %+v", block.Hash())
 			invMsg := &proto.GetInvMsg{}
 			invMsg.Type = proto.InvType_block
 			invMsg.Hashs = []string{inv.Hash().String()}
