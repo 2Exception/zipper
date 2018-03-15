@@ -349,8 +349,7 @@ func (bc *Blockchain) GenerateBlock(txs proto.Transactions, createTime uint32) *
 
 func (bc *Blockchain) Relay(inv proto.IInventory) {
 	var (
-		msg    *p2p.Message
-		invMsg = &proto.GetInvMsg{}
+		msg *p2p.Message
 	)
 	switch inv.(type) {
 	case *proto.Transaction:
@@ -361,14 +360,12 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 		}
 		if bc.ProcessTransaction(tx, true) {
 			log.Debugf("ProcessTransaction, tx_hash: %+v", tx.Hash())
-			invMsg.Type = proto.InvType_transaction
-			invMsg.Hashs = []string{inv.Hash().String()}
-
 			header := &p2p.Header{}
 			header.ProtoID = 1
-			header.MsgID = 1
-			imsgByte, _ := invMsg.MarshalMsg()
-			msg = p2p.NewMessage(header, imsgByte)
+			header.MsgID = uint32(proto.MsgType_BC_OnTransactionMsg)
+			msg = p2p.NewMessage(header, inv.Serialize())
+
+			bc.server.Broadcast(msg, peer.NVP)
 		}
 	case *proto.Block:
 		block := inv.(*proto.Block)
@@ -379,17 +376,17 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 
 		if bc.ProcessBlock(block, true) {
 			log.Debugf("Relay inventory %v", inv)
+			invMsg := &proto.GetInvMsg{}
 			invMsg.Type = proto.InvType_block
 			invMsg.Hashs = []string{inv.Hash().String()}
 
 			header := &p2p.Header{}
 			header.ProtoID = 1
-			header.MsgID = 1
+			header.MsgID = uint32(proto.MsgType_BC_GetInvMsg)
 			imsgByte, _ := invMsg.MarshalMsg()
 			msg = p2p.NewMessage(header, imsgByte)
+
+			bc.server.Broadcast(msg, peer.ALL)
 		}
-	}
-	if msg != nil {
-		bc.server.Broadcast(msg, peer.ALL)
 	}
 }

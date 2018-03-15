@@ -18,20 +18,14 @@
 package rpc
 
 import (
-	"bytes"
-	"encoding/base64"
 	"io"
 	"net"
-	"net/http"
-	"net/rpc"
-	"net/rpc/jsonrpc"
-	"strings"
 
-	"github.com/zipper-project/zipper/common/log"
 	"github.com/zipper-project/zipper/blockchain"
+	"github.com/zipper-project/zipper/common/log"
+	"github.com/zipper-project/zipper/common/rpc"
 	"github.com/zipper-project/zipper/config"
 )
-
 
 type HttpConn struct {
 	in  io.Reader
@@ -50,7 +44,6 @@ func (c *HttpConn) Write(d []byte) (n int, err error) { return c.out.Write(d) }
 func (c *HttpConn) Close() error                      { return nil }
 
 func NewServer(bc *blockchain.Blockchain) *rpc.Server {
-
 	server := rpc.NewServer()
 
 	server.Register(NewRPCTransaction(bc))
@@ -63,54 +56,12 @@ func StartServer(server *rpc.Server, option *config.RPCOption) {
 	if option.Enabled == false {
 		return
 	}
-
-	listener, err := net.Listen("tcp", ":"+option.Port)
-	if err != nil {
-		log.Fatal("listen error:", err)
+	var (
+		listener net.Listener
+		err      error
+	)
+	if listener, err = net.Listen("tcp", ":"+option.Port); err != nil {
+		log.Errorf("TestServer error %+v", err)
 	}
-	defer listener.Close()
-
-	http.Serve(listener, http.HandlerFunc(BasicAuth(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			serverCodec := jsonrpc.NewServerCodec(&HttpConn{in: r.Body, out: w})
-			w.Header().Set("Content-type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			err := server.ServeRequest(serverCodec)
-			if err != nil {
-				log.Printf("Error while serving JSON request: %v", err)
-				http.Error(w, "Error while serving JSON request, details have been logged.", 500)
-				return
-			}
-		}
-	}, option.User, option.PassWord)))
+	rpc.NewHTTPServer(server, []string{"*"}).Serve(listener)
 }
-
-// ViewFunc defines view method
-type ViewFunc func(http.ResponseWriter, *http.Request)
-
-// BasicAuth handles basic authtication
-func BasicAuth(f ViewFunc, user, passwd string) ViewFunc {
-	if user == "" || passwd == "" {
-		return f
-	}
-	return func(w http.ResponseWriter, r *http.Request) {
-		basicAuthPrefix := "Basic "
-		// get request header
-		auth := r.Header.Get("Authorization")
-		if strings.HasPrefix(auth, basicAuthPrefix) {
-			payload, err := base64.StdEncoding.DecodeString(
-				auth[len(basicAuthPrefix):],
-			)
-			if err == nil {
-				pair := bytes.SplitN(payload, []byte(":"), 2)
-				if len(pair) == 2 && bytes.Equal(pair[0], []byte(user)) &&
-					bytes.Equal(pair[1], []byte(passwd)) {
-					f(w, r)
-					return
-				}
-			}
-		}
-		http.Error(w, "Error user or password.", http.StatusUnauthorized)
-	}
-}
-
