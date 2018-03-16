@@ -10,7 +10,7 @@ type ConsensusWorker struct {
 }
 
 func (worker *ConsensusWorker) VmJob(data interface{}) (interface{}, error) {
-	workerData := data.(types.WorkerData)
+	workerData := data.(*types.WorkerData)
 	msg := workerData.GetMsg()
 
 	worker.consenter.RecvConsensus(msg.Payload)
