@@ -3,6 +3,7 @@ package consensus
 import (
 	"github.com/zipper-project/zipper/types"
 	"github.com/zipper-project/zipper/common/mpool"
+	"github.com/zipper-project/zipper/common/log"
 )
 
 type ConsensusWorker struct {
@@ -13,6 +14,7 @@ func (worker *ConsensusWorker) VmJob(data interface{}) (interface{}, error) {
 	workerData := data.(*types.WorkerData)
 	msg := workerData.GetMsg()
 
+	log.Debugf("======= ConsensusWorker recv proto: %+v, msg: %+v", msg.Header.ProtoID, msg.Header.MsgID)
 	worker.consenter.RecvConsensus(msg.Payload)
 	return nil, nil
 }
