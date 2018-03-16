@@ -185,12 +185,7 @@ func (scip *Scip) recvRequest(request *Request) *Message {
 		}
 		core := scip.getscipCore(digest)
 		var txs, etxs proto.Transactions
-		if scip.testing {
-			txs = request.Txs
-			etxs = nil
-		} else {
-			txs, etxs = scip.stack.VerifyTxs(request.Txs)
-		}
+		txs, etxs = scip.stack.VerifyTxs(request.Txs)
 		core.txs = txs
 		core.errTxs = etxs
 		scip.seqNo++
@@ -295,12 +290,7 @@ func (scip *Scip) recvPrePrepare(preprepare *PrePrepare) *Message {
 			return nil
 		}
 		var txs, etxs proto.Transactions
-		if scip.testing {
-			txs = preprepare.Request.Txs
-			etxs = nil
-		} else {
-			txs, etxs = scip.stack.VerifyTxs(preprepare.Request.Txs)
-		}
+		txs, etxs = scip.stack.VerifyTxs(preprepare.Request.Txs)
 		if !bytes.Equal(merkleRootHash(etxs).Bytes(), []byte(preprepare.MerkleRoot)) {
 			log.Errorf("Replica %s received PrePrepare from %s for consensus %s: failed to verify", scip.options.ID, preprepare.ReplicaID, digest)
 			vc := &ViewChange{
@@ -478,28 +468,7 @@ func (scip *Scip) recvCommitted(committed *Committed) *Message {
 		scip.stopNewViewTimerForCore(core)
 		delete(scip.coreStore, digest)
 		d = core.endTime.Sub(core.startTime)
-		d = time.Now().Sub(core.startTime)
-		if scip.testing {
-			cnt := len(core.prePrepare.Request.Txs)
-			if scip.statisticsCnt != 0 && cnt != scip.statisticsCnt {
-				var min, max, sum time.Duration
-				for _, d := range scip.statistics {
-					sum = sum + d
-					if min == 0 || min > d {
-						min = d
-					}
-					if max < d {
-						max = d
-					}
-				}
-				log.Infof("testing ... txs:%d\tmin: %s, max: %s, avg: %s, size: %d", scip.statisticsCnt, min, max, sum/time.Duration(len(scip.statistics)), len(scip.statistics))
-				scip.statistics = make(map[string]time.Duration)
-			}
-			scip.statisticsCnt = cnt
-			scip.statistics[digest] = d
-			scip.testChan <- struct{}{}
-		}
-		if core.txs == nil {
+		if core.txs != nil {
 			scip.function(4, core.txs)
 		}
 	}

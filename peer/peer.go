@@ -186,8 +186,9 @@ func (peer *Peer) recv(ctx context.Context) {
 			return
 		default:
 		}
-		peer.conn.SetReadDeadline(time.Now().Add(option.DeadLine))
+
 		//head
+		peer.conn.SetReadDeadline(time.Now().Add(option.DeadLine))
 		headerBytes := make([]byte, headerSize)
 		if n, err := peer.conn.Read(headerBytes); err != nil {
 			if err == io.EOF {
@@ -211,6 +212,7 @@ func (peer *Peer) recv(ctx context.Context) {
 			return
 		}
 		data := make([]byte, dataSize)
+		peer.conn.SetReadDeadline(time.Now().Add(option.DeadLine))
 		if n, err := io.ReadFull(peer.conn, data); err != nil {
 			log.Errorf("Peer %s(%s->%s) conn read data --- %s", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), err)
 			return

@@ -41,7 +41,6 @@ func NewScip(options *Options, stack consensus.IStack) *Scip {
 	scip := &Scip{
 		options:    options,
 		stack:      stack,
-		testing:    true,
 		testChan:   make(chan struct{}),
 		statistics: make(map[string]time.Duration),
 
@@ -79,7 +78,6 @@ type Scip struct {
 	sync.RWMutex
 	options       *Options
 	stack         consensus.IStack
-	testing       bool
 	testChan      chan struct{}
 	statistics    map[string]time.Duration
 	statisticsCnt int
@@ -132,9 +130,6 @@ func (scip *Scip) Start() {
 	if scip.exit != nil {
 		log.Warnf("Replica %s consenter already started", scip.options.ID)
 		return
-	}
-	if scip.testing {
-		//scip.testConsensus()
 	}
 	log.Infof("scip : %s", scip)
 	log.Infof("Replica %s consenter started", scip.options.ID)
@@ -248,9 +243,6 @@ func (scip *Scip) BroadcastConsensusChannel() <-chan *consensus.BroadcastConsens
 
 //OutputTxsChannel Commit block data
 func (scip *Scip) OutputTxsChannel() <-chan *consensus.OutputTxs {
-	if scip.testing {
-		return nil
-	}
 	return scip.outputTxsChan
 }
 

@@ -61,7 +61,7 @@ func StartServer(server *rpc.Server, option *config.RPCOption) {
 		err      error
 	)
 	if listener, err = net.Listen("tcp", ":"+option.Port); err != nil {
-		log.Errorf("TestServer error %+v", err)
+		log.Errorf("RPC Server error %+v", err)
 	}
 	rpc.NewHTTPServer(server, []string{"*"}).Serve(listener)
 }
