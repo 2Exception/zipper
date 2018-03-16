@@ -41,7 +41,7 @@ type SyncWorker struct {
 func (worker *SyncWorker) VmJob(data interface{}) (interface{}, error) {
 	workerData := data.(*types.WorkerData)
 	msg := workerData.GetMsg()
-	log.Debugf("========================> syncWorker ID: %+v", msg.Header.MsgID)
+	log.Debugf("======> syncWorker ProtoID: %+v, MsgID: %+v", msg.Header.MsgID, msg.Header.MsgID)
 	switch proto.MsgType(msg.Header.MsgID) {
 	case proto.MsgType_BC_OnStatusMSg:
 		worker.OnStatus(workerData)
@@ -101,7 +101,7 @@ func (worker *SyncWorker) OnStatus(workerData *types.WorkerData) {
 
 		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_GetBlocksMsg, getBlocksMsg)
 	} else if !worker.bc.Started() {
-		worker.bc.Start()
+		worker.bc.StartServices()
 	}
 }
 

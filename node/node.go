@@ -61,7 +61,7 @@ func NewNode(cfgFile string) *Node {
 	}
 
 	pm.SetBlockChain(node.bc)
-	pm.RegisterWorker(proto.ProtoID_ConsensusWorker, consensus.GetSyncWorkers(1,  node.bc.GetConsenter()))
+	pm.RegisterWorker(proto.ProtoID_ConsensusWorker, consensus.GetConsensusWorkers(1,  node.bc.GetConsenter()))
 	pm.RegisterWorker(proto.ProtoID_SyncWorker, blocksync.GetSyncWorkers(1, node.bc))
 	return node
 }

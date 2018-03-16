@@ -55,13 +55,13 @@ func (pm *ProtoManager) RegisterWorker(protocalID mproto.ProtoID, workers []mpoo
 		return fmt.Errorf("wm: %s have beed registered", protocalID)
 	}
 
-	log.Debugf("=======> protoManager. ProtoID: %+v", protocalID)
 	vm := mpool.CreateCustomVM(workers)
 	_, err := vm.Open(string(uint32(protocalID)))
 	if err != nil {
 		return err
 	}
 	pm.wm[protocalID] = vm
+	log.Debugf("===========>>>ProtoID: %+v, is Running(vm): %+v, map Running(vm): %+v, vm: %p", protocalID, vm.IsRunning(), pm.wm[protocalID].IsRunning(), vm)
 	return nil
 }
 
@@ -88,6 +88,7 @@ func (pm *ProtoManager) CreateStatusMsg() (*proto.Message, error) {
 func (pm *ProtoManager) Handle(sendPeer *peer.Peer, msg *proto.Message) error {
 	pm.Lock()
 	defer pm.Unlock()
+
 
 	err := pm.wm[mproto.ProtoID(msg.Header.ProtoID)].SendWorkCleanAsync(types.NewWorkerData(sendPeer, msg))
 	return err

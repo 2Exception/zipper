@@ -46,6 +46,10 @@ type VirtualMachine struct {
 	jobcnt  int
 }
 
+func (vm *VirtualMachine) IsRunning() bool {
+	return vm.isRunning()
+}
+
 func (vm *VirtualMachine) isRunning() bool {
 	return (atomic.LoadUint32(&vm.running) == 1)
 }
@@ -83,6 +87,7 @@ func (vm *VirtualMachine) Open(name string) (*VirtualMachine, error) {
 		}
 
 		//go vm.Loop()
+		vm.name = name
 		vm.setRunning(true)
 		return vm, nil
 	}
@@ -245,13 +250,15 @@ func (vm *VirtualMachine) SendWorkClean(jobData interface{}) (interface{}, error
 	//defer vm.statusMutex.Unlock()
 
 	if vm.isRunning() {
+		//log.Debugf("=== VirtualMachine: %p, is Running: %+v", vm, vm.IsRunning())
 		if chose, _, ok := reflect.Select(vm.selects); ok && chose >= 0 {
-			//log.Debugf("chose: %+v, same_cnt: %+v", chose, len(vm.selects))
 			vm.jobcnt ++
 			vm.workers[chose].jobChan <- jobData
+			return nil, nil
+		} else {
+			log.Errorf("Vm(%+v) is running , chose: %+v, ok: %+v", vm.name, chose, ok)
+			return nil, ErrWorkerClosed
 		}
-
-		return nil, ErrWorkerClosed
 	}
 
 	return nil, ErrVMNotRunning
