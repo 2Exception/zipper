@@ -15,7 +15,6 @@
 // You should have received a copy of the ISC License
 // along with this program.  If not, see <https://opensource.org/licenses/isc>.
 
-
 package blocksync
 
 import (
@@ -25,12 +24,12 @@ import (
 	"github.com/zipper-project/zipper/blockchain"
 	"github.com/zipper-project/zipper/common/crypto"
 	"github.com/zipper-project/zipper/common/log"
+	"github.com/zipper-project/zipper/common/mpool"
 	"github.com/zipper-project/zipper/ledger"
 	"github.com/zipper-project/zipper/peer"
 	msgProto "github.com/zipper-project/zipper/peer/proto"
 	"github.com/zipper-project/zipper/proto"
 	"github.com/zipper-project/zipper/types"
-	"github.com/zipper-project/zipper/common/mpool"
 )
 
 type SyncWorker struct {
@@ -74,7 +73,7 @@ func NewSyncWorker(ledger *ledger.Ledger, bc *blockchain.Blockchain) *SyncWorker
 	}
 }
 
-func GetSyncWorkers(workerNums int, bc *blockchain.Blockchain)  []mpool.VmWorker {
+func GetSyncWorkers(workerNums int, bc *blockchain.Blockchain) []mpool.VmWorker {
 	cssWorkers := make([]mpool.VmWorker, 0)
 	for i := 0; i < workerNums; i++ {
 		cssWorkers = append(cssWorkers, NewSyncWorker(bc.GetLedger(), bc))
@@ -100,7 +99,7 @@ func (worker *SyncWorker) OnStatus(workerData *types.WorkerData) {
 			HashStop:      crypto.Hash{}.String(),
 		}
 
-		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_OnStatusMSg, getBlocksMsg)
+		worker.SendMsg(workerData.GetSendPeer(), proto.ProtoID_SyncWorker, proto.MsgType_BC_GetBlocksMsg, getBlocksMsg)
 	} else if !worker.bc.Started() {
 		worker.bc.Start()
 	}

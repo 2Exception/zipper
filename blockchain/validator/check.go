@@ -28,7 +28,6 @@ import (
 	"github.com/zipper-project/zipper/ledger/state"
 	"github.com/zipper-project/zipper/params"
 	"github.com/zipper-project/zipper/proto"
-	"github.com/zipper-project/zipper/common/log"
 )
 
 func (v *Verification) isOverCapacity() bool {
@@ -130,7 +129,6 @@ func (v *Verification) checkTransactionLegal(tx *proto.Transaction) error {
 func (v *Verification) isIssueTransaction(tx *proto.Transaction) bool {
 	address := tx.Sender()
 	addressHex := utils.BytesToHex(address.Bytes())
-	log.Debugf("")
 	for _, addr := range v.config.PublicAddresses {
 		if strings.Compare(addressHex, addr) == 0 {
 			return true

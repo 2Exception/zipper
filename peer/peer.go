@@ -250,6 +250,8 @@ func (peer *Peer) recv(ctx context.Context) {
 				peer.ID = handshake.Id
 				peer.handshaked = true
 				peer.SendMsg(NewHandshakeAckMessage())
+				msg, _ := peer.protocol.CreateStatusMsg()
+				peer.SendMsg(msg)
 				go peer.loop(ctx)
 			case HANDSHAKEACK:
 				handshake := &proto.HandShake{}
@@ -268,6 +270,8 @@ func (peer *Peer) recv(ctx context.Context) {
 				peer.Type = handshake.Type
 				peer.ID = handshake.Id
 				peer.handshaked = true
+				msg, _ := peer.protocol.CreateStatusMsg()
+				peer.SendMsg(msg)
 				go peer.loop(ctx)
 			default:
 				log.Errorf("Peer %s(%s->%s) handle msg %d, no handshake", peer, peer.conn.LocalAddr().String(), peer.conn.RemoteAddr().String(), msg.Header.MsgID)
