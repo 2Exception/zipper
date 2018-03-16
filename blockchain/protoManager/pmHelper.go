@@ -91,6 +91,7 @@ func (pm *ProtoManager) Handle(sendPeer *peer.Peer, msg *proto.Message) error {
 
 
 	err := pm.wm[mproto.ProtoID(msg.Header.ProtoID)].SendWorkCleanAsync(types.NewWorkerData(sendPeer, msg))
+	log.Debugf("ProtoManager recv, ProtoID: %+v, Msg: %+v", msg.Header.ProtoID, msg.Header.MsgID)
 	return err
 }
 
