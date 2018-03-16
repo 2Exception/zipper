@@ -364,7 +364,7 @@ func (bc *Blockchain) Relay(inv proto.IInventory) {
 			header.ProtoID = uint32(proto.ProtoID_SyncWorker)
 			header.MsgID = uint32(proto.MsgType_BC_OnTransactionMsg)
 			msg = p2p.NewMessage(header, inv.Serialize())
-			bc.server.Broadcast(msg, peer.NVP)
+			bc.server.Broadcast(msg, peer.VP)
 		}
 	case *proto.Block:
 		block := inv.(*proto.Block)
